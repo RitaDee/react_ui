@@ -1,21 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { setGreeting } from '../redux/actions';
 
-function Greeting() {
-  const [greeting, setGreeting] = useState('');
+const fetchGreeting = async () => {
+  try {
+    const response = await fetch('http://127.0.0.1:3000/api/v1/greetings');
+    const data = await response.json();
+    setGreeting(data.greeting);
+  } catch (error) {
+    console.error('Error fetching greeting:', error);
+  }
+};
 
+function Greeting({ greeting, setGreeting }) {
   useEffect(() => {
     fetchGreeting();
   }, []);
-
-  const fetchGreeting = async () => {
-    try {
-      const response = await fetch('http://127.0.0.1:3000/api/v1/greetings');
-      const data = await response.json();
-      setGreeting(data.greeting);
-    } catch (error) {
-      console.error('Error fetching greeting:', error);
-    }
-  };
 
   return (
     <div>
@@ -25,4 +26,17 @@ function Greeting() {
   );
 }
 
-export default Greeting;
+Greeting.propTypes = {
+  greeting: PropTypes.string.isRequired,
+  setGreeting: PropTypes.func.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  greeting: state.greeting,
+});
+
+const mapDispatchToProps = {
+  setGreeting,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Greeting);
